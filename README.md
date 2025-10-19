@@ -1,11 +1,13 @@
 # Tetris
 
-Ce dépôt propose une implémentation simplifiée de Tetris en Python avec gestion des profils, des scores et une interface en ligne de commande.
+Ce dépôt propose une implémentation simplifiée de Tetris en Python avec gestion des profils, des scores, une interface en ligne de commande et un tableau de bord web prêt pour un déploiement sur un hébergement Hostinger (Passenger + application WSGI minimale).
 
 ## Structure du projet
 
 ```
 ├── data/                  # Fichiers persistants (profils et scores)
+├── app.py                 # Application WSGI minimale pour Hostinger
+├── passenger_wsgi.py      # Point d'entrée WSGI pour Passenger
 ├── main.py                # Point d'entrée CLI
 ├── src/
 │   └── tetris/
@@ -20,7 +22,7 @@ Ce dépôt propose une implémentation simplifiée de Tetris en Python avec gest
     └── test_profiles.py   # Tests de persistance et de gestion des profils
 ```
 
-## Installation et exécution
+## Installation et exécution locale
 
 1. Créez un environnement virtuel et installez les dépendances nécessaires (uniquement `pytest` pour les tests) :
 
@@ -70,3 +72,40 @@ pytest
 ```
 
 Les tests utilisent un stockage temporaire afin de ne pas impacter les fichiers de données réels.
+
+## Déploiement sur Hostinger
+
+L'hébergeur mutualisé Python de Hostinger repose sur Passenger et attend une application WSGI. Le dépôt inclut tout le nécessaire pour cette configuration.
+
+1. **Préparer l'environnement**
+
+   - (Optionnel) Créez un environnement virtuel sur l'hébergement :
+
+     ```bash
+     python3 -m venv ~/tetris-venv
+     source ~/tetris-venv/bin/activate
+     ```
+
+   - Positionnez la variable d'environnement `TETRIS_DATA_FILE` vers un emplacement persistant (par exemple `~/tetris-data/profiles.json`). Passenger peut la définir via le fichier `.bash_profile` ou le panneau Hostinger.
+
+2. **Déployer les fichiers**
+
+   - Copiez l'ensemble du dépôt dans le dossier `~/domains/<votre-domaine>/public_python/` (ou le dossier configuré par Hostinger pour votre application Python).
+   - Vérifiez que `passenger_wsgi.py` est à la racine de ce dossier et pointe vers `app.py`.
+
+3. **Redémarrer Passenger**
+
+   - Depuis le panneau de contrôle Hostinger, redémarrez l'application. Passenger détectera `passenger_wsgi.py` et importera `application`.
+
+4. **Tester l'API**
+
+   - Ouvrez `https://<votre-domaine>/` pour voir le tableau de bord (scores + profils).
+   - Utilisez les endpoints REST pour gérer l'application :
+
+     ```bash
+     curl -X POST https://<votre-domaine>/api/profiles -H 'Content-Type: application/json' -d '{"name": "Alice"}'
+     curl -X POST https://<votre-domaine>/api/scores -H 'Content-Type: application/json' -d '{"profile": "Alice", "score": 12345, "lines": 40}'
+     curl https://<votre-domaine>/api/scores
+     ```
+
+Le jeu CLI peut continuer à être utilisé en parallèle pour jouer localement ; il suffit de synchroniser les scores vers l'API web si vous souhaitez centraliser les résultats.

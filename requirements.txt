@@ -1,0 +1,1 @@
+# Cette application n'a pas de dépendances externes obligatoires.

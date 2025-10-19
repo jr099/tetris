@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 DATA_DIR = Path("data")
 DATA_FILE = DATA_DIR / "profiles.json"
@@ -46,7 +47,12 @@ class Profile:
 class ProfileManager:
     """Handle creation, lookup and selection of profiles."""
 
-    def __init__(self, data_file: Path = DATA_FILE) -> None:
+    def __init__(self, data_file: Optional[Union[str, Path]] = None) -> None:
+        if data_file is None:
+            env_path = os.environ.get("TETRIS_DATA_FILE")
+            data_file = Path(env_path) if env_path else DATA_FILE
+        else:
+            data_file = Path(data_file)
         self.data_file = data_file
         self._data = self._load()
 
