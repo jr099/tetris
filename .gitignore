@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.db
+.env
+.venv/
+.data/
+profiles.json
+*.egg-info/
+.DS_Store
+data/profiles.json
